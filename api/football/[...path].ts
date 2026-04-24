@@ -61,6 +61,6 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
   const contentType = upstream.headers.get('content-type') ?? 'application/json';
   const body = await upstream.text();
   res.setHeader('content-type', contentType);
-  res.setHeader('cache-control', 'public, s-maxage=15, stale-while-revalidate=30');
+  res.setHeader('cache-control', 'no-store, max-age=0');
   res.status(upstream.status).send(body);
 }
