@@ -2,9 +2,6 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist/football-analyser/browser",
-  "functions": {
-    "api/**/*.ts": {}
-  },
   "rewrites": [
     {
       "source": "/api/football/:path*",
