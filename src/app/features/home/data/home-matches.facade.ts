@@ -61,7 +61,10 @@ export class HomeMatchesFacade {
         this.loadMatches(leagueIds, date).pipe(
           map(({ matches, failedCount }) => ({
             loading: false,
-            error: failedCount > 0 ? 'Osa liigoista ei latautunut. Naytetaan saatavilla olevat ottelut.' : null,
+            error:
+              failedCount > 0 && matches.length === 0
+                ? 'Osa liigoista ei latautunut. Naytetaan saatavilla olevat ottelut.'
+                : null,
             matches
           })),
           catchError((error: unknown) =>
@@ -146,7 +149,7 @@ export class HomeMatchesFacade {
   private mapErrorMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 401 || error.status === 403) {
-        return 'API-avain hylattiin (401/403). Tarkista avain environment.development.ts-tiedostossa.';
+        return 'API-kaytto estettiin (401/403). Tarkista kirjautumistiedot ja palvelimen ymparistomuuttujat.';
       }
 
       if (error.status === 429) {
