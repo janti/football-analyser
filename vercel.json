@@ -4,7 +4,7 @@
   "outputDirectory": "dist/football-analyser/browser",
   "rewrites": [
     {
-      "source": "/api/football/:path*",
+      "source": "/api/football/:path+",
       "destination": "/api/football?path=:path*"
     },
     {
