@@ -6,11 +6,11 @@ module.exports = async function handler(req, res) {
     const path = Array.isArray(rawPath) ? rawPath[0] || '' : rawPath || '';
 
     if (path === '__health') {
-      const appUser = process.env.APP_GATE_USER;
-      const appPassword = process.env.APP_GATE_PASSWORD;
-      const apiKey = process.env.API_FOOTBALL_KEY;
-      const incomingUser = String(req.headers['x-app-user'] || '');
-      const incomingPassword = String(req.headers['x-app-password'] || '');
+      const appUser = String(process.env.APP_GATE_USER || '').trim();
+      const appPassword = String(process.env.APP_GATE_PASSWORD || '').trim();
+      const apiKey = String(process.env.API_FOOTBALL_KEY || '').trim();
+      const incomingUser = String(req.headers['x-app-user'] || '').trim();
+      const incomingPassword = String(req.headers['x-app-password'] || '').trim();
 
       res.status(200).json({
         ok: true,
@@ -29,23 +29,27 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const apiKey = process.env.API_FOOTBALL_KEY;
-    const appUser = process.env.APP_GATE_USER;
-    const appPassword = process.env.APP_GATE_PASSWORD;
+    const apiKey = String(process.env.API_FOOTBALL_KEY || '').trim();
+    const appUser = String(process.env.APP_GATE_USER || '').trim();
+    const appPassword = String(process.env.APP_GATE_PASSWORD || '').trim();
 
     if (!apiKey || !appUser || !appPassword) {
+      res.setHeader('x-proxy-debug', 'missing-env');
       res.status(500).json({
         message: 'Missing API_FOOTBALL_KEY, APP_GATE_USER or APP_GATE_PASSWORD environment variable.'
       });
       return;
     }
 
-    const incomingUser = String(req.headers['x-app-user'] || '');
-    const incomingPassword = String(req.headers['x-app-password'] || '');
+    const incomingUser = String(req.headers['x-app-user'] || '').trim();
+    const incomingPassword = String(req.headers['x-app-password'] || '').trim();
     if (incomingUser !== appUser || incomingPassword !== appPassword) {
+      res.setHeader('x-proxy-auth', 'failed');
       res.status(401).json({ message: 'Unauthorized app credentials.' });
       return;
     }
+
+    res.setHeader('x-proxy-auth', 'ok');
 
     const targetPath = path ? `/${path}` : '';
     const targetUrl = new URL(`${API_BASE_URL}${targetPath}`);
@@ -74,9 +78,15 @@ module.exports = async function handler(req, res) {
     const body = await upstream.text();
     res.setHeader('content-type', contentType);
     res.setHeader('cache-control', 'no-store, max-age=0');
+    if (upstream.status === 401 || upstream.status === 403) {
+      res.setHeader('x-upstream-auth', 'failed');
+    } else {
+      res.setHeader('x-upstream-auth', 'ok');
+    }
     res.status(upstream.status).send(body);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown serverless error.';
+    res.setHeader('x-proxy-debug', 'exception');
     res.status(500).json({ message: `Function failed: ${message}` });
   }
 };
