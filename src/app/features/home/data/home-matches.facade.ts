@@ -26,6 +26,7 @@ interface HomeMatchesState {
 interface LoadMatchesResult {
   matches: Match[];
   failedCount: number;
+  failedStatuses: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -59,14 +60,21 @@ export class HomeMatchesFacade {
       return concat(
         of<HomeMatchesState>({ loading: true, error: null, matches: [] }),
         this.loadMatches(leagueIds, date).pipe(
-          map(({ matches, failedCount }) => ({
-            loading: false,
-            error:
-              failedCount > 0 && matches.length === 0
-                ? 'Osa liigoista ei latautunut. Naytetaan saatavilla olevat ottelut.'
-                : null,
-            matches
-          })),
+          map(({ matches, failedCount, failedStatuses }) => {
+            if (failedCount > 0 && matches.length === 0) {
+              return {
+                loading: false,
+                error: this.mapPartialFailureMessage(failedStatuses),
+                matches
+              };
+            }
+
+            return {
+              loading: false,
+              error: null,
+              matches
+            };
+          }),
           catchError((error: unknown) =>
             of<HomeMatchesState>({
               loading: false,
@@ -109,19 +117,26 @@ export class HomeMatchesFacade {
 
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      return of({ matches: cached, failedCount: 0 });
+      return of({ matches: cached, failedCount: 0, failedStatuses: [] });
     }
 
     const requests = sortedLeagueIds.map((leagueId) =>
       this.api.getFixturesByDateAndLeague(dateIso, leagueId).pipe(
-        map((response) => ({ response, failed: false })),
-        catchError(() => of({ response: null, failed: true }))
+        map((response) => ({ response, failed: false, status: 0 })),
+        catchError((error: unknown) =>
+          of({
+            response: null,
+            failed: true,
+            status: error instanceof HttpErrorResponse ? error.status : 0
+          })
+        )
       )
     );
 
     return forkJoin(requests).pipe(
       map((results) => {
         const failedCount = results.filter((x) => x.failed).length;
+        const failedStatuses = results.filter((x) => x.failed).map((x) => x.status);
         const matches = results
           .filter((x) => x.response !== null)
           .flatMap((x) => x.response!.response.map(mapApiFixtureToMatch))
@@ -141,9 +156,25 @@ export class HomeMatchesFacade {
           });
 
         this.cache.set(cacheKey, matches);
-        return { matches, failedCount };
+        return { matches, failedCount, failedStatuses };
       })
     );
+  }
+
+  private mapPartialFailureMessage(statuses: number[]): string {
+    if (statuses.some((status) => status === 401 || status === 403)) {
+      return 'Kirjautumistiedot hylattiin (401/403). Kirjaudu uudelleen APP_GATE_USER ja APP_GATE_PASSWORD -tiedoilla.';
+    }
+
+    if (statuses.some((status) => status === 500)) {
+      return 'Palvelinvirhe (500). Tarkista Vercel Environment Variables: API_FOOTBALL_KEY, APP_GATE_USER, APP_GATE_PASSWORD.';
+    }
+
+    if (statuses.some((status) => status === 429)) {
+      return 'API-pyyntoraja tuli vastaan (429). Yrita hetken kuluttua uudelleen.';
+    }
+
+    return 'Osa liigoista ei latautunut. Naytetaan saatavilla olevat ottelut.';
   }
 
   private mapErrorMessage(error: unknown): string {
