@@ -1,7 +1,5 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
 
 import { AuthService } from '../auth/auth.service';
 import { APP_ENVIRONMENT } from '../config/app-environment';
@@ -9,7 +7,6 @@ import { APP_ENVIRONMENT } from '../config/app-environment';
 export const apiFootballAuthInterceptor: HttpInterceptorFn = (req, next) => {
   const env = inject(APP_ENVIRONMENT);
   const auth = inject(AuthService);
-  const router = inject(Router);
 
   const isProxyMode = env.apiFootballBaseUrl === '/api/football';
   const isProxyRequest = isProxyMode
@@ -50,13 +47,5 @@ export const apiFootballAuthInterceptor: HttpInterceptorFn = (req, next) => {
     }
   });
 
-  return next(proxiedReq).pipe(
-    catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        auth.logout();
-        void router.navigate(['/login']);
-      }
-      return throwError(() => error);
-    })
-  );
+  return next(proxiedReq);
 };
