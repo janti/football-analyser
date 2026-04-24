@@ -4,7 +4,6 @@ type QueryValue = string | string[] | undefined;
 type RequestLike = {
   headers: Record<string, string | string[] | undefined>;
   query?: Record<string, QueryValue>;
-  url?: string;
 };
 type ResponseLike = {
   status: (code: number) => ResponseLike;
@@ -16,10 +15,9 @@ type ResponseLike = {
 export default async function handler(req: RequestLike, res: ResponseLike): Promise<void> {
   try {
     const rawPath = req.query?.['path'];
-    const pathParts = Array.isArray(rawPath) ? rawPath : rawPath ? [rawPath] : [];
-    const targetPath = pathParts.join('/');
+    const path = Array.isArray(rawPath) ? rawPath[0] ?? '' : rawPath ?? '';
 
-    if (targetPath === '__health') {
+    if (path === '__health') {
       const appUser = process.env['APP_GATE_USER'];
       const appPassword = process.env['APP_GATE_PASSWORD'];
       const apiKey = process.env['API_FOOTBALL_KEY'];
@@ -61,18 +59,17 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
       return;
     }
 
-    const targetUrl = new URL(`${API_BASE_URL}/${targetPath}`);
+    const targetPath = path ? `/${path}` : '';
+    const targetUrl = new URL(`${API_BASE_URL}${targetPath}`);
 
     Object.entries(req.query ?? {}).forEach(([key, value]) => {
       if (key === 'path') {
         return;
       }
-
       if (Array.isArray(value)) {
         value.forEach((item) => targetUrl.searchParams.append(key, item));
         return;
       }
-
       if (value !== undefined) {
         targetUrl.searchParams.set(key, String(value));
       }
