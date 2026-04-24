@@ -3,9 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/football-analyser/browser",
   "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node@3.0.0"
-    }
+    "api/**/*.ts": {}
   },
   "rewrites": [
     {
