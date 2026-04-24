@@ -34,16 +34,32 @@ export class HomeMatchesFacade {
   private readonly api = inject(ApiFootballService);
 
   readonly leagueOptions: LeagueFilterOption[] = [
-    { id: 39, name: 'Premier League' },
-    { id: 140, name: 'La Liga' },
-    { id: 135, name: 'Serie A' },
-    { id: 78, name: 'Bundesliga' },
-    { id: 61, name: 'Ligue 1' },
-    { id: 2, name: 'Champions League' }
+    { id: 39, name: 'Premier League', country: 'England', gender: 'men' },
+    { id: 140, name: 'La Liga', country: 'Spain', gender: 'men' },
+    { id: 135, name: 'Serie A', country: 'Italy', gender: 'men' },
+    { id: 78, name: 'Bundesliga', country: 'Germany', gender: 'men' },
+    { id: 61, name: 'Ligue 1', country: 'France', gender: 'men' },
+    { id: 179, name: 'Veikkausliiga', country: 'Finland', gender: 'men' },
+    { id: 113, name: 'Allsvenskan', country: 'Sweden', gender: 'men' },
+    { id: 103, name: 'Eliteserien', country: 'Norway', gender: 'men' },
+    { id: 44, name: "Women's Super League", country: 'England', gender: 'women' },
+    { id: 142, name: 'Liga F', country: 'Spain', gender: 'women' },
+    { id: 139, name: "Serie A Women", country: 'Italy', gender: 'women' },
+    { id: 183, name: "Frauen-Bundesliga", country: 'Germany', gender: 'women' },
+    { id: 168, name: "Division 1 Feminine", country: 'France', gender: 'women' },
+    { id: 244, name: 'Kansallinen Liiga', country: 'Finland', gender: 'women' },
+    { id: 114, name: 'Damallsvenskan', country: 'Sweden', gender: 'women' },
+    { id: 220, name: 'Toppserien', country: 'Norway', gender: 'women' },
+    { id: 2, name: 'Champions League', country: 'Europe', gender: 'men' },
+    { id: 1, name: 'World Cup' },
+    { id: 4, name: 'Euro Championship' },
+    { id: 10, name: 'Friendlies' },
+    { id: 11, name: 'UEFA Nations League' },
+    { id: 32, name: 'World Cup - Qualification Europe' },
+    { id: 34, name: 'Euro Championship - Qualification' }
   ];
+  readonly defaultLeagueIds: number[] = [39, 140, 135, 78, 61, 2, 1, 4, 10, 11, 32, 34];
   private readonly leagueOrder = new Map<number, number>(this.leagueOptions.map((league, index) => [league.id, index]));
-
-  private readonly defaultLeagueIds = this.leagueOptions.map((x) => x.id);
   private readonly selectedLeagueIdsSubject = new BehaviorSubject<number[]>(this.defaultLeagueIds);
   readonly selectedLeagueIds$ = this.selectedLeagueIdsSubject.asObservable();
 
@@ -93,7 +109,8 @@ export class HomeMatchesFacade {
       ...state,
       selectedLeagueIds,
       selectedDate,
-      leagueOptions: this.leagueOptions
+      leagueOptions: this.leagueOptions,
+      defaultLeagueIds: this.defaultLeagueIds
     }))
   );
 

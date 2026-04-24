@@ -8,7 +8,7 @@
   </div>
 
   <div class="chips">
-    @for (league of options(); track trackByLeagueId($index, league)) {
+    @for (league of visiblePrimaryLeagues(); track trackByLeagueId($index, league)) {
       <button
         type="button"
         [attr.aria-label]="league.name"
@@ -20,4 +20,56 @@
       </button>
     }
   </div>
+
+  <details class="country-menu">
+    <summary>{{ 'league.countryMenuTitle' | t }}</summary>
+    <div class="country-columns">
+      <section>
+        <h4>{{ 'league.menTopLeagues' | t }}</h4>
+        @for (country of menCountries; track country) {
+          @if (leaguesByCountryAndGender(country, 'men').length) {
+            <div class="country-group">
+              <p>{{ country }}</p>
+              <div class="chips">
+                @for (league of leaguesByCountryAndGender(country, 'men'); track trackByLeagueId($index, league)) {
+                  <button
+                    type="button"
+                    [attr.aria-label]="league.name"
+                    class="chip"
+                    [class.selected]="selectedIds().includes(league.id)"
+                    (click)="toggle.emit(league.id)"
+                  >
+                    {{ league.name }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+      </section>
+      <section>
+        <h4>{{ 'league.womenTopLeagues' | t }}</h4>
+        @for (country of womenCountries; track country) {
+          @if (leaguesByCountryAndGender(country, 'women').length) {
+            <div class="country-group">
+              <p>{{ country }}</p>
+              <div class="chips">
+                @for (league of leaguesByCountryAndGender(country, 'women'); track trackByLeagueId($index, league)) {
+                  <button
+                    type="button"
+                    [attr.aria-label]="league.name"
+                    class="chip"
+                    [class.selected]="selectedIds().includes(league.id)"
+                    (click)="toggle.emit(league.id)"
+                  >
+                    {{ league.name }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+      </section>
+    </div>
+  </details>
 </section>

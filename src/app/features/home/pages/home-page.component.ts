@@ -31,7 +31,8 @@ import { HomeMatchesFacade } from '../data/home-matches.facade';
 })
 export class HomePageComponent {
   readonly vm$;
-  readonly quickDateOffsets = [0, 1, 2, 3];
+  readonly quickDateOffsets = [-3, -2, -1, 0, 1, 2, 3];
+  showLeagueDialog = false;
 
   constructor(
     private readonly homeMatchesFacade: HomeMatchesFacade,
@@ -49,12 +50,20 @@ export class HomePageComponent {
   }
 
   onSelectDefaults(): void {
-    this.homeMatchesFacade.setSelectedLeagueIds(this.homeMatchesFacade.leagueOptions.map((x) => x.id));
+    this.homeMatchesFacade.setSelectedLeagueIds(this.homeMatchesFacade.defaultLeagueIds);
   }
 
-  onQuickDateSelect(daysBack: number): void {
+  openLeagueDialog(): void {
+    this.showLeagueDialog = true;
+  }
+
+  closeLeagueDialog(): void {
+    this.showLeagueDialog = false;
+  }
+
+  onQuickDateSelect(dayOffset: number): void {
     const date = new Date();
-    date.setDate(date.getDate() - daysBack);
+    date.setDate(date.getDate() + dayOffset);
     this.homeMatchesFacade.setSelectedDate(this.toIsoDate(date));
   }
 
@@ -67,17 +76,20 @@ export class HomePageComponent {
     this.homeMatchesFacade.setSelectedDate(value);
   }
 
-  isSelectedDate(daysBack: number, selectedDate: string): boolean {
+  isSelectedDate(dayOffset: number, selectedDate: string): boolean {
     const date = new Date();
-    date.setDate(date.getDate() - daysBack);
+    date.setDate(date.getDate() + dayOffset);
     return this.toIsoDate(date) === selectedDate;
   }
 
-  quickDateLabel(daysBack: number): string {
-    if (daysBack === 0) {
+  quickDateLabel(dayOffset: number): string {
+    if (dayOffset === 0) {
       return this.localization.t('home.today');
     }
-    return this.localization.t('home.daysBack', { n: daysBack });
+    if (dayOffset > 0) {
+      return this.localization.t('home.daysAhead', { n: dayOffset });
+    }
+    return this.localization.t('home.daysBack', { n: Math.abs(dayOffset) });
   }
 
   private toIsoDate(date: Date): string {

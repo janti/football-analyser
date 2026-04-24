@@ -3,6 +3,22 @@
   gap: 1.1rem;
 }
 
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.8rem;
+}
+
+.league-dialog-open {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #111827;
+  color: #e2e8f0;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
 .date-filter {
   display: flex;
   flex-wrap: wrap;
@@ -58,8 +74,62 @@
   padding: 1rem;
 }
 
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(2 6 23 / 72%);
+  z-index: 80;
+}
+
+.league-dialog {
+  position: fixed;
+  top: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(920px, calc(100vw - 2rem));
+  max-height: 84vh;
+  overflow: auto;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  background: #0b1220;
+  padding: 0.9rem;
+  z-index: 81;
+}
+
+.league-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.league-dialog-header h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.league-dialog-close {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #111827;
+  color: #cbd5e1;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
 @media (max-width: 640px) {
   .page {
     gap: 0.9rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .league-dialog {
+    top: 5vh;
+    width: calc(100vw - 1rem);
   }
 }

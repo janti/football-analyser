@@ -37,6 +37,8 @@ export interface Match {
 export interface LeagueFilterOption {
   id: number;
   name: string;
+  country?: string;
+  gender?: 'men' | 'women';
 }
 
 export interface FixtureDetails {

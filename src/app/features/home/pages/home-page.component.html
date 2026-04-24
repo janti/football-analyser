@@ -1,8 +1,12 @@
 <section class="page">
-  <app-section-header
-    [title]="'home.title' | t"
-    [subtitle]="'home.subtitle' | t"
-  />
+  <div class="page-header">
+    <app-section-header
+      [title]="'home.title' | t"
+    />
+    <button type="button" class="league-dialog-open" (click)="openLeagueDialog()">
+      {{ 'home.showParams' | t }}
+    </button>
+  </div>
 
   @if (vm$ | async; as vm) {
     <section class="date-filter">
@@ -20,18 +24,9 @@
       </div>
 
       <label class="date-input">
-        <span>{{ 'home.selectDay' | t }}</span>
         <input type="date" [attr.aria-label]="'home.selectDay' | t" [value]="vm.selectedDate" (change)="onDateInputChange($event)" />
       </label>
     </section>
-
-    <app-league-filter
-      [options]="vm.leagueOptions"
-      [selectedIds]="vm.selectedLeagueIds"
-      (toggle)="onToggleLeague($event)"
-      (clearAll)="onClearLeagues()"
-      (selectDefaults)="onSelectDefaults()"
-    />
 
     @if (vm.loading) {
       <app-skeleton-grid [count]="8" />
@@ -44,6 +39,26 @@
       />
     } @else {
       <app-matches-list [matches]="vm.matches" />
+    }
+
+    @if (showLeagueDialog) {
+      <div class="dialog-backdrop" (click)="closeLeagueDialog()"></div>
+      <section class="league-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'home.showParams' | t">
+        <div class="league-dialog-header">
+          <h3>{{ 'home.showParams' | t }}</h3>
+          <button type="button" class="league-dialog-close" (click)="closeLeagueDialog()">
+            {{ 'home.closeDialog' | t }}
+          </button>
+        </div>
+        <app-league-filter
+          [options]="vm.leagueOptions"
+          [defaultLeagueIds]="vm.defaultLeagueIds"
+          [selectedIds]="vm.selectedLeagueIds"
+          (toggle)="onToggleLeague($event)"
+          (clearAll)="onClearLeagues()"
+          (selectDefaults)="onSelectDefaults()"
+        />
+      </section>
     }
   }
 </section>
