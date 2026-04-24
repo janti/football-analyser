@@ -1,0 +1,31 @@
+<a class="card" [routerLink]="['/matches', match().id]" aria-label="Open match details">
+  <div class="meta">
+    <span>{{ match().league.name }}</span>
+    <span>{{ formatKickoffTime(match().date) }}</span>
+  </div>
+
+  <div class="team-row">
+    <div class="team">
+      @if (match().homeTeam.logo) {
+        <img [src]="match().homeTeam.logo" [alt]="match().homeTeam.name" />
+      }
+      <span>{{ match().homeTeam.name }}</span>
+    </div>
+    <strong>{{ match().homeGoals ?? '-' }}</strong>
+  </div>
+
+  <div class="team-row">
+    <div class="team">
+      @if (match().awayTeam.logo) {
+        <img [src]="match().awayTeam.logo" [alt]="match().awayTeam.name" />
+      }
+      <span>{{ match().awayTeam.name }}</span>
+    </div>
+    <strong>{{ match().awayGoals ?? '-' }}</strong>
+  </div>
+
+  <div class="status">
+    <span>{{ formatMatchStatus(match().status, match().minute) }}</span>
+    <span>{{ formatScore(match().homeGoals, match().awayGoals) }}</span>
+  </div>
+</a>

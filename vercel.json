@@ -1,0 +1,18 @@
+{
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/football-analyser",
+  "routes": [
+    {
+      "src": "^/api/(.*)$",
+      "dest": "/api/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^(.*)$",
+      "dest": "/index.html"
+    }
+  ]
+}

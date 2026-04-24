@@ -1,0 +1,39 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #090d1a;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --surface-1: #111827;
+  --surface-2: #0f172a;
+  --surface-border: #1f2937;
+  --interactive-border: #334155;
+  --primary: #1d4ed8;
+  --primary-contrast: #ffffff;
+  --focus: #93c5fd;
+  --radius-md: 14px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.4;
+}
+
+a,
+button,
+input {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

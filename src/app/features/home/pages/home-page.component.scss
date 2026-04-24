@@ -1,0 +1,65 @@
+.page {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.date-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: end;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  background: #111827;
+  padding: 0.9rem;
+}
+
+.quick-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-days button {
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #cbd5e1;
+  padding: 0.42rem 0.68rem;
+  cursor: pointer;
+}
+
+.quick-days button.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.date-input {
+  display: grid;
+  gap: 0.3rem;
+  color: #cbd5e1;
+  font-size: 0.86rem;
+}
+
+.date-input input {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.45rem 0.6rem;
+}
+
+.state {
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  background: #111827;
+  padding: 1rem;
+}
+
+@media (max-width: 640px) {
+  .page {
+    gap: 0.9rem;
+  }
+}

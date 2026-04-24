@@ -1,0 +1,244 @@
+<section class="page">
+  <a routerLink="/" class="back">← {{ 'match.back' | t }}</a>
+
+  @if (vm$ | async; as vm) {
+    @if (vm.loading) {
+      <app-loading-spinner [label]="'match.loading' | t" />
+    } @else if (vm.error) {
+      <app-error-message [message]="vm.error | t" />
+    } @else if (vm.empty || !vm.details) {
+      <app-empty-state [title]="'match.emptyTitle' | t" [description]="'match.emptyDesc' | t" />
+    } @else {
+      <header class="hero">
+        <div class="league">
+          @if (vm.details.header.leagueLogo) {
+            <img [src]="vm.details.header.leagueLogo" [alt]="vm.details.header.leagueName" />
+          }
+          <span>{{ vm.details.header.leagueCountry }} - {{ vm.details.header.leagueName }}</span>
+        </div>
+
+        <div class="teams">
+          <a [routerLink]="['/teams', vm.details.header.homeTeam.id]" class="team">
+            @if (vm.details.header.homeTeam.logo) {
+              <img [src]="vm.details.header.homeTeam.logo" [alt]="vm.details.header.homeTeam.name" />
+            }
+            <div class="team-info">
+              <strong>{{ vm.details.header.homeTeam.name }}</strong>
+              <div class="scorer-line">
+                @if (goalScorers(vm.details.events, vm.details.header.homeTeam.id).length) {
+                  <ul>
+                    @for (scorer of goalScorers(vm.details.events, vm.details.header.homeTeam.id); track scorer) {
+                      <li>{{ scorer }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+          </a>
+
+          <div class="score">
+            <span>{{ formatScore(vm.details.header.homeTeam.score, vm.details.header.awayTeam.score) }}</span>
+            <small>
+              {{ formatMatchStatus(vm.details.header.status, vm.details.header.minute) }}
+            </small>
+          </div>
+
+          <a [routerLink]="['/teams', vm.details.header.awayTeam.id]" class="team">
+            @if (vm.details.header.awayTeam.logo) {
+              <img [src]="vm.details.header.awayTeam.logo" [alt]="vm.details.header.awayTeam.name" />
+            }
+            <div class="team-info">
+              <strong>{{ vm.details.header.awayTeam.name }}</strong>
+              <div class="scorer-line">
+                @if (goalScorers(vm.details.events, vm.details.header.awayTeam.id).length) {
+                  <ul>
+                    @for (scorer of goalScorers(vm.details.events, vm.details.header.awayTeam.id); track scorer) {
+                      <li>{{ scorer }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="meta">
+          <span>{{ vm.details.header.date | date: 'd.M.y' }} {{ formatKickoffTime(vm.details.header.date) }}</span>
+          @if (vm.details.header.venueName) {
+            <span>{{ vm.details.header.venueName }} {{ vm.details.header.venueCity ? '(' + vm.details.header.venueCity + ')' : '' }}</span>
+          }
+        </div>
+      </header>
+
+      <nav class="tabs">
+        @for (tab of tabs; track trackByTab($index, tab)) {
+          <button type="button" [class.active]="activeTab === tab.key" (click)="setTab(tab.key)">
+            {{ tab.label | t }}
+          </button>
+        }
+      </nav>
+
+      @if (activeTab === 'overview') {
+        <section class="panel">
+          <app-section-header [title]="'match.tabs.overview' | t" [subtitle]="'match.overview.subtitle' | t" />
+          @if (!vm.details.events.length) {
+            <app-empty-state [title]="'match.overview.noEventsTitle' | t" [description]="'match.overview.noEventsDesc' | t" />
+          } @else {
+            <div class="timeline">
+              @for (event of vm.details.events.slice(0, 8); track trackByEvent($index, event)) {
+                <div class="timeline-item">
+                  <span class="minute">{{ event.minute ?? '-' }}'</span>
+                  <div>
+                    <strong>{{ event.type }} - {{ event.detail }}</strong>
+                    <p>
+                      {{ event.teamName }}
+                      @if (event.playerName) {
+                        - {{ event.playerName }}
+                      }
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab === 'lineups') {
+        <section class="panel">
+          <app-section-header [title]="'match.tabs.lineups' | t" [subtitle]="'match.lineups.subtitle' | t" />
+          @if (!vm.details.lineups.length) {
+            <app-empty-state [title]="'match.lineups.noneTitle' | t" [description]="'match.lineups.noneDesc' | t" />
+          } @else {
+            <div class="lineups-grid">
+              @for (lineup of vm.details.lineups; track trackByLineup($index, lineup)) {
+                <article class="lineup-card">
+                  <h3>
+                    @if (lineup.teamLogo) {
+                      <img [src]="lineup.teamLogo" [alt]="lineup.teamName" />
+                    }
+                    <a [routerLink]="['/teams', lineup.teamId]">{{ lineup.teamName }}</a>
+                  </h3>
+                  <p>{{ 'match.lineups.formation' | t }}: {{ lineup.formation || '-' }} | {{ 'match.lineups.coach' | t }}: {{ lineup.coach || '-' }}</p>
+
+                  <h4>{{ 'match.lineups.starting' | t }}</h4>
+                  <ul>
+                    @for (player of lineup.startXI; track player.id || player.name) {
+                      <li>
+                        @if (player.id) {
+                          <a [routerLink]="['/players', player.id]">{{ player.number ? player.number + ' ' : '' }}{{ player.name }}</a>
+                        } @else {
+                          <span>{{ player.number ? player.number + ' ' : '' }}{{ player.name }}</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+
+                  <h4>{{ 'match.lineups.bench' | t }}</h4>
+                  <ul>
+                    @for (player of lineup.substitutes; track player.id || player.name) {
+                      <li>
+                        @if (player.id) {
+                          <a [routerLink]="['/players', player.id]">{{ player.number ? player.number + ' ' : '' }}{{ player.name }}</a>
+                        } @else {
+                          <span>{{ player.number ? player.number + ' ' : '' }}{{ player.name }}</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </article>
+              }
+            </div>
+          }
+
+          <div class="subs-section">
+            <h3>{{ 'match.lineups.substitutions' | t }}</h3>
+            @if (!hasSubstitutionEvents(vm.details.events)) {
+              <p class="muted">{{ 'match.lineups.noSubs' | t }}</p>
+            } @else {
+              <div class="timeline">
+                @for (event of vm.details.events; track trackByEvent($index, event)) {
+                  @if (event.type.toLowerCase().includes('subst')) {
+                    <div class="timeline-item">
+                      <span class="minute">{{ event.minute ?? '-' }}{{ event.extra ? '+' + event.extra : '' }}'</span>
+                      <div>
+                        <strong>{{ event.teamName }}</strong>
+                        <p>
+                          {{ 'match.lineups.out' | t }}:
+                          @if (event.playerId) {
+                            <a [routerLink]="['/players', event.playerId]">{{ event.playerName || '-' }}</a>
+                          } @else {
+                            {{ event.playerName || '-' }}
+                          }
+                          | {{ 'match.lineups.in' | t }}:
+                          @if (event.assistId) {
+                            <a [routerLink]="['/players', event.assistId]">{{ event.assistName || '-' }}</a>
+                          } @else {
+                            {{ event.assistName || '-' }}
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (activeTab === 'events') {
+        <section class="panel">
+          <app-section-header [title]="'match.tabs.events' | t" [subtitle]="'match.events.subtitle' | t" />
+          @if (!vm.details.events.length) {
+            <app-empty-state [title]="'match.events.noneTitle' | t" [description]="'match.events.noneDesc' | t" />
+          } @else {
+            <div class="timeline">
+              @for (event of vm.details.events; track trackByEvent($index, event)) {
+                <div class="timeline-item">
+                  <span class="minute">{{ event.minute ?? '-' }}{{ event.extra ? '+' + event.extra : '' }}'</span>
+                  <div>
+                    <strong>{{ event.type }} - {{ event.detail }}</strong>
+                    <p>
+                      {{ event.teamName }}
+                      @if (event.playerName) {
+                        -
+                        @if (event.playerId) {
+                          <a [routerLink]="['/players', event.playerId]">{{ event.playerName }}</a>
+                        } @else {
+                          {{ event.playerName }}
+                        }
+                      }
+                      @if (event.assistName) {
+                        ({{ 'match.events.assist' | t }}: {{ event.assistName }})
+                      }
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab === 'stats') {
+        <section class="panel">
+          <app-section-header [title]="'match.tabs.stats' | t" [subtitle]="'match.stats.subtitle' | t" />
+          @if (!vm.details.stats.length) {
+            <app-empty-state [title]="'match.stats.noneTitle' | t" [description]="'match.stats.noneDesc' | t" />
+          } @else {
+            <div class="stats">
+              @for (stat of vm.details.stats; track trackByStat($index, stat)) {
+                <div class="stat-row">
+                  <span>{{ stat.homeValue ?? '-' }}</span>
+                  <strong>{{ stat.type }}</strong>
+                  <span>{{ stat.awayValue ?? '-' }}</span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
+  }
+</section>

@@ -1,0 +1,49 @@
+<section class="page">
+  <app-section-header
+    [title]="'home.title' | t"
+    [subtitle]="'home.subtitle' | t"
+  />
+
+  @if (vm$ | async; as vm) {
+    <section class="date-filter">
+      <div class="quick-days">
+        @for (offset of quickDateOffsets; track offset) {
+          <button
+            type="button"
+            [attr.aria-label]="'home.selectDay' | t"
+            [class.active]="isSelectedDate(offset, vm.selectedDate)"
+            (click)="onQuickDateSelect(offset)"
+          >
+            {{ quickDateLabel(offset) }}
+          </button>
+        }
+      </div>
+
+      <label class="date-input">
+        <span>{{ 'home.selectDay' | t }}</span>
+        <input type="date" [attr.aria-label]="'home.selectDay' | t" [value]="vm.selectedDate" (change)="onDateInputChange($event)" />
+      </label>
+    </section>
+
+    <app-league-filter
+      [options]="vm.leagueOptions"
+      [selectedIds]="vm.selectedLeagueIds"
+      (toggle)="onToggleLeague($event)"
+      (clearAll)="onClearLeagues()"
+      (selectDefaults)="onSelectDefaults()"
+    />
+
+    @if (vm.loading) {
+      <app-skeleton-grid [count]="8" />
+    } @else if (vm.error) {
+      <app-error-message [title]="'home.errorTitle' | t" [message]="vm.error" />
+    } @else if (!vm.matches.length) {
+      <app-empty-state
+        [title]="'home.emptyTitle' | t"
+        [description]="'home.emptyDesc' | t"
+      />
+    } @else {
+      <app-matches-list [matches]="vm.matches" />
+    }
+  }
+</section>

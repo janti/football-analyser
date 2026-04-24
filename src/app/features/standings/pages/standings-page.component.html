@@ -1,0 +1,65 @@
+<section class="page">
+  <app-section-header
+    [title]="'standings.title' | t"
+    [subtitle]="'standings.subtitle' | t"
+  />
+
+  @if (vm$ | async; as vm) {
+    <div class="league-select">
+      @for (league of vm.leagueOptions; track trackByLeague($index, league)) {
+        <button
+          type="button"
+          [attr.aria-label]="league.name"
+          [class.active]="vm.selectedLeagueId === league.id"
+          (click)="selectLeague(league.id)"
+        >
+          {{ league.name }}
+        </button>
+      }
+    </div>
+
+    @if (vm.loading) {
+      <app-loading-spinner [label]="'standings.loading' | t" />
+    } @else if (vm.error) {
+      <app-error-message [message]="vm.error | t" />
+    } @else if (!vm.rows.length) {
+      <app-empty-state [title]="'standings.emptyTitle' | t" [description]="'standings.emptyDesc' | t" />
+    } @else {
+      <div class="table-wrap">
+        <table aria-label="League standings">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{{ 'table.team' | t }}</th>
+              <th>{{ 'table.played' | t }}</th>
+              <th>{{ 'table.wins' | t }}</th>
+              <th>{{ 'table.draws' | t }}</th>
+              <th>{{ 'table.losses' | t }}</th>
+              <th>{{ 'table.goalDiff' | t }}</th>
+              <th>{{ 'table.points' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of vm.rows; track trackByRow($index, row)) {
+              <tr [routerLink]="['/teams', row.team.id]">
+                <td>{{ row.rank }}</td>
+                <td class="team">
+                  @if (row.team.logo) {
+                    <img [src]="row.team.logo" [alt]="row.team.name" loading="lazy" />
+                  }
+                  <span>{{ row.team.name }}</span>
+                </td>
+                <td>{{ row.played }}</td>
+                <td>{{ row.wins }}</td>
+                <td>{{ row.draws }}</td>
+                <td>{{ row.losses }}</td>
+                <td>{{ row.goalsFor - row.goalsAgainst }}</td>
+                <td><strong>{{ row.points }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</section>

@@ -1,0 +1,31 @@
+<main class="app-shell">
+  <header class="header">
+    <div class="header-inner">
+      <a routerLink="/" class="brand">Football Analyser</a>
+      @if (isAuthenticated() && !(isLoginPage$ | async)) {
+        <nav class="nav">
+          @for (item of navItems; track item.link) {
+            <a
+              [routerLink]="item.link"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: item.link === '/' }"
+            >
+              {{ item.labelKey | t }}
+            </a>
+          }
+        </nav>
+      }
+      <div class="lang-switch">
+        <button type="button" [class.active]="language() === 'fi'" (click)="setLanguage('fi')">FI</button>
+        <button type="button" [class.active]="language() === 'en'" (click)="setLanguage('en')">EN</button>
+        @if (isAuthenticated()) {
+          <button type="button" (click)="logout()">{{ 'nav.logout' | t }}</button>
+        }
+      </div>
+    </div>
+  </header>
+
+  <section class="content">
+    <router-outlet />
+  </section>
+</main>

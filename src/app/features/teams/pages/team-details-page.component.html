@@ -1,0 +1,133 @@
+<section class="page">
+  <a routerLink="/" class="back">← {{ 'team.back' | t }}</a>
+  <app-section-header [title]="'team.title' | t" [subtitle]="'team.subtitle' | t" />
+
+  @if (vm$ | async; as vm) {
+    @if (vm.loading) {
+      <app-loading-spinner [label]="'team.loading' | t" />
+    } @else if (vm.error) {
+      <app-error-message [message]="vm.error | t" />
+    } @else if (!vm.data) {
+      <app-empty-state [title]="'team.emptyTitle' | t" [description]="'team.emptyDesc' | t" />
+    } @else {
+      <header class="hero">
+        @if (vm.data.logo) {
+          <img [src]="vm.data.logo" [alt]="vm.data.name" />
+        }
+        <div>
+          <h2>{{ vm.data.name }}</h2>
+          <p>{{ 'team.meta.country' | t }}: {{ vm.data.country || '-' }} | {{ 'team.meta.founded' | t }}: {{ vm.data.founded || '-' }}</p>
+          <p>
+            {{ 'team.meta.stadium' | t }}: {{ vm.data.venueName || '-' }}
+            @if (vm.data.venueCity) {
+              ({{ vm.data.venueCity }})
+            }
+            | {{ 'team.meta.capacity' | t }}: {{ vm.data.venueCapacity || '-' }}
+          </p>
+        </div>
+      </header>
+
+      <nav class="tabs">
+        @for (tab of tabs; track trackByTab($index, tab)) {
+          <button type="button" [class.active]="activeTab === tab.key" (click)="setTab(tab.key)">
+            {{ tab.label | t }}
+          </button>
+        }
+      </nav>
+
+      @if (activeTab === 'overview') {
+        <section class="panel">
+          <app-section-header [title]="'team.tabs.overview' | t" [subtitle]="'team.overview.subtitle' | t" />
+          <div class="overview-grid">
+            <div class="box"><span>{{ 'team.overview.team' | t }}</span><strong>{{ vm.data.name }}</strong></div>
+            <div class="box"><span>{{ 'team.overview.country' | t }}</span><strong>{{ vm.data.country || '-' }}</strong></div>
+            <div class="box"><span>{{ 'team.overview.stadium' | t }}</span><strong>{{ vm.data.venueName || '-' }}</strong></div>
+            <div class="box"><span>{{ 'team.overview.founded' | t }}</span><strong>{{ vm.data.founded || '-' }}</strong></div>
+          </div>
+        </section>
+      }
+
+      @if (activeTab === 'squad') {
+        <section class="panel">
+          <app-section-header [title]="'team.tabs.squad' | t" [subtitle]="'team.squad.subtitle' | t" />
+          @if (!vm.data.squad.length) {
+            <app-empty-state [title]="'team.squad.noneTitle' | t" [description]="'team.squad.noneDesc' | t" />
+          } @else {
+            <div class="squad-grid">
+              @for (player of vm.data.squad; track trackByPlayer($index, player)) {
+                <a class="player-card" [routerLink]="['/players', player.id]">
+                  @if (player.photo) {
+                    <img [src]="player.photo" [alt]="player.name" />
+                  }
+                  <div>
+                    <strong>{{ player.name }}</strong>
+                    <p>#{{ player.number || '-' }} | {{ player.position || '-' }} | {{ player.age || '-' }}v</p>
+                  </div>
+                </a>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab === 'recent') {
+        <section class="panel">
+          <app-section-header [title]="'team.tabs.recent' | t" [subtitle]="'team.recent.subtitle' | t" />
+          @if (!vm.data.recentMatches.length) {
+            <app-empty-state [title]="'team.recent.noneTitle' | t" [description]="'team.recent.noneDesc' | t" />
+          } @else {
+            <div class="match-list">
+              @for (match of vm.data.recentMatches; track trackByMatch($index, match)) {
+                <a class="match-row" [routerLink]="['/matches', match.id]">
+                  <span>{{ match.date | date: 'd.M HH:mm' }}</span>
+                  <strong>{{ match.homeTeam.name }} - {{ match.awayTeam.name }}</strong>
+                  <span>{{ match.homeGoals ?? '-' }} - {{ match.awayGoals ?? '-' }}</span>
+                </a>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab === 'standings') {
+        <section class="panel">
+          <app-section-header [title]="'team.tabs.standings' | t" [subtitle]="'team.standings.subtitle' | t" />
+          @if (!vm.data.standingsRows.length) {
+            <app-empty-state [title]="'team.standings.noneTitle' | t" [description]="'team.standings.noneDesc' | t" />
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>{{ 'table.team' | t }}</th>
+                    <th>{{ 'table.played' | t }}</th>
+                    <th>{{ 'table.wins' | t }}</th>
+                    <th>{{ 'table.draws' | t }}</th>
+                    <th>{{ 'table.losses' | t }}</th>
+                    <th>{{ 'table.goalDiff' | t }}</th>
+                    <th>{{ 'table.points' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of vm.data.standingsRows; track trackByStanding($index, row)) {
+                    <tr [routerLink]="['/teams', row.team.id]">
+                      <td>{{ row.rank }}</td>
+                      <td>{{ row.team.name }}</td>
+                      <td>{{ row.played }}</td>
+                      <td>{{ row.wins }}</td>
+                      <td>{{ row.draws }}</td>
+                      <td>{{ row.losses }}</td>
+                      <td>{{ row.goalsFor - row.goalsAgainst }}</td>
+                      <td><strong>{{ row.points }}</strong></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+    }
+  }
+</section>

@@ -1,0 +1,23 @@
+<section class="filter">
+  <div class="header-row">
+    <h3>{{ 'league.title' | t }}</h3>
+    <div class="actions">
+      <button type="button" [attr.aria-label]="'league.defaults' | t" (click)="selectDefaults.emit()">{{ 'league.defaults' | t }}</button>
+      <button type="button" [attr.aria-label]="'league.clear' | t" (click)="clearAll.emit()">{{ 'league.clear' | t }}</button>
+    </div>
+  </div>
+
+  <div class="chips">
+    @for (league of options(); track trackByLeagueId($index, league)) {
+      <button
+        type="button"
+        [attr.aria-label]="league.name"
+        class="chip"
+        [class.selected]="selectedIds().includes(league.id)"
+        (click)="toggle.emit(league.id)"
+      >
+        {{ league.name }}
+      </button>
+    }
+  </div>
+</section>

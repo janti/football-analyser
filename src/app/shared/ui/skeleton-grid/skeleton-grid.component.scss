@@ -1,0 +1,32 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.75rem;
+}
+
+.card {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+}
+
+.line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #1f2937 25%, #334155 50%, #1f2937 75%);
+  background-size: 220% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+
+.line--short {
+  width: 55%;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -220% 0;
+  }
+}

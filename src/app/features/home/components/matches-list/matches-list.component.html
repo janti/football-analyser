@@ -1,0 +1,5 @@
+<section class="grid">
+  @for (match of matches(); track trackByMatchId($index, match)) {
+    <app-home-match-card [match]="match" />
+  }
+</section>

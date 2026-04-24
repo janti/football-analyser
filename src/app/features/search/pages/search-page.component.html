@@ -1,0 +1,76 @@
+<section class="page">
+  <app-section-header
+    [title]="'search.title' | t"
+    [subtitle]="'search.subtitle' | t"
+  />
+
+  <div class="tabs">
+    @for (tab of tabs; track tab.key) {
+      <button type="button" [attr.aria-label]="tab.label | t" [class.active]="(tab$ | async) === tab.key" (click)="setTab(tab.key)">
+        {{ tab.label | t }}
+      </button>
+    }
+  </div>
+
+  <input [formControl]="queryControl" [attr.aria-label]="'search.title' | t" type="search" [placeholder]="'search.placeholder' | t" />
+
+  @if (vm$ | async; as vm) {
+    @if (vm.query.length < 2) {
+      <app-empty-state [title]="'search.startTitle' | t" [description]="'search.startDesc' | t" />
+    } @else if (vm.loading) {
+      <app-loading-spinner [label]="'search.loading' | t" />
+    } @else if (vm.error) {
+      <app-error-message [message]="vm.error | t" />
+    } @else if (vm.tab === 'matches' && !vm.matches.length) {
+      <app-empty-state [title]="'search.empty.matches' | t" [description]="'search.empty.try' | t" />
+    } @else if (vm.tab === 'teams' && !vm.teams.length) {
+      <app-empty-state [title]="'search.empty.teams' | t" [description]="'search.empty.try' | t" />
+    } @else if (vm.tab === 'players' && !vm.players.length) {
+      <app-empty-state [title]="'search.empty.players' | t" [description]="'search.empty.try' | t" />
+    } @else {
+      <div class="results">
+        @if (vm.tab === 'matches') {
+          @for (match of vm.matches; track trackByMatch($index, match)) {
+            <a class="card" [routerLink]="['/matches', match.id]" aria-label="Open match details">
+              <div class="top">
+                <strong>{{ match.league.name }}</strong>
+                <span>{{ match.date | date: 'd.M HH:mm' }}</span>
+              </div>
+              <div class="line">
+                <span>{{ match.homeTeam.name }}</span>
+                <strong>{{ match.homeGoals ?? '-' }}</strong>
+              </div>
+              <div class="line">
+                <span>{{ match.awayTeam.name }}</span>
+                <strong>{{ match.awayGoals ?? '-' }}</strong>
+              </div>
+            </a>
+          }
+        }
+
+        @if (vm.tab === 'teams') {
+          @for (team of vm.teams; track trackByTeam($index, team)) {
+            <a class="card" [routerLink]="['/teams', team.id]" aria-label="Open team details">
+              <div class="line">
+                <strong>{{ team.name }}</strong>
+                <span>{{ team.country || '-' }}</span>
+              </div>
+            </a>
+          }
+        }
+
+        @if (vm.tab === 'players') {
+          @for (player of vm.players; track trackByPlayer($index, player)) {
+            <a class="card" [routerLink]="['/players', player.id]" aria-label="Open player details">
+              <div class="line">
+                <strong>{{ player.name }}</strong>
+                <span>{{ player.nationality || '-' }}</span>
+              </div>
+              <p>{{ player.team?.name || ('search.noTeamInfo' | t) }}</p>
+            </a>
+          }
+        }
+      </div>
+    }
+  }
+</section>

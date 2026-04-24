@@ -1,0 +1,59 @@
+<section class="page">
+  <a routerLink="/" class="back">← {{ 'player.back' | t }}</a>
+  <app-section-header [title]="'player.title' | t" [subtitle]="'player.subtitle' | t" />
+
+  @if (vm$ | async; as vm) {
+    @if (vm.loading) {
+      <app-loading-spinner [label]="'player.loading' | t" />
+    } @else if (vm.error) {
+      <app-error-message [message]="vm.error | t" />
+    } @else if (!vm.data) {
+      <app-empty-state [title]="'player.emptyTitle' | t" [description]="'player.emptyDesc' | t" />
+    } @else {
+      <section class="hero">
+        @if (vm.data.photo) {
+          <img [src]="vm.data.photo" [alt]="vm.data.name" />
+        }
+        <div>
+          <h2>{{ vm.data.name }}</h2>
+          <p>
+            {{ vm.data.nationality || '-' }} | {{ 'player.meta.age' | t }}: {{ vm.data.age || '-' }} | {{ 'player.meta.position' | t }}:
+            {{ vm.data.position || '-' }}
+          </p>
+          <p>
+            {{ 'player.meta.height' | t }}: {{ vm.data.height || '-' }} | {{ 'player.meta.weight' | t }}: {{ vm.data.weight || '-' }} | {{ 'player.meta.birthCountry' | t }}:
+            {{ vm.data.birthCountry || '-' }}
+          </p>
+          @if (vm.data.currentTeam) {
+            <a [routerLink]="['/teams', vm.data.currentTeam.id]" class="team-link">
+              @if (vm.data.currentTeam.logo) {
+                <img [src]="vm.data.currentTeam.logo" [alt]="vm.data.currentTeam.name" />
+              }
+              {{ vm.data.currentTeam.name }}
+            </a>
+          }
+        </div>
+      </section>
+
+      @if (!vm.data.statGroups.length) {
+        <app-empty-state [title]="'player.stats.noneTitle' | t" [description]="'player.stats.noneDesc' | t" />
+      } @else {
+        <section class="groups">
+          @for (group of vm.data.statGroups; track trackByGroup($index, group)) {
+            <article class="group-card">
+              <h3>{{ group.title }}</h3>
+              <div class="items">
+                @for (item of group.items; track trackByItem($index, item)) {
+                  <div class="item">
+                    <span>{{ item.label }}</span>
+                    <strong>{{ item.value }}</strong>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        </section>
+      }
+    }
+  }
+</section>

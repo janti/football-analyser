@@ -1,0 +1,49 @@
+.card {
+  display: grid;
+  gap: 0.55rem;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 0.9rem;
+  text-decoration: none;
+  color: #f8fafc;
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  border-color: #334155;
+}
+
+.meta,
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+img {
+  width: 18px;
+  height: 18px;
+}
+
+.team span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
