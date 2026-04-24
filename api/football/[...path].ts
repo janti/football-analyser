@@ -13,6 +13,34 @@ type ResponseLike = {
 };
 
 export default async function handler(req: RequestLike, res: ResponseLike): Promise<void> {
+  const rawPath = req.query['path'];
+  const pathParts = Array.isArray(rawPath) ? rawPath : rawPath ? [rawPath] : [];
+  const targetPath = pathParts.join('/');
+
+  if (targetPath === '__health') {
+    const appUser = process.env['APP_GATE_USER'];
+    const appPassword = process.env['APP_GATE_PASSWORD'];
+    const apiKey = process.env['API_FOOTBALL_KEY'];
+    const incomingUser = String(req.headers['x-app-user'] ?? '');
+    const incomingPassword = String(req.headers['x-app-password'] ?? '');
+
+    res.status(200).json({
+      ok: true,
+      env: {
+        hasApiKey: Boolean(apiKey),
+        hasAppUser: Boolean(appUser),
+        hasAppPassword: Boolean(appPassword)
+      },
+      auth: {
+        hasIncomingUser: Boolean(incomingUser),
+        hasIncomingPassword: Boolean(incomingPassword),
+        userMatches: Boolean(appUser) && incomingUser === appUser,
+        passwordMatches: Boolean(appPassword) && incomingPassword === appPassword
+      }
+    });
+    return;
+  }
+
   const apiKey = process.env['API_FOOTBALL_KEY'];
   const appUser = process.env['APP_GATE_USER'];
   const appPassword = process.env['APP_GATE_PASSWORD'];
@@ -31,9 +59,6 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
     return;
   }
 
-  const rawPath = req.query['path'];
-  const pathParts = Array.isArray(rawPath) ? rawPath : rawPath ? [rawPath] : [];
-  const targetPath = pathParts.join('/');
   const targetUrl = new URL(`${API_BASE_URL}/${targetPath}`);
 
   Object.entries(req.query).forEach(([key, value]) => {
