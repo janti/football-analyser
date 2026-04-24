@@ -15,10 +15,6 @@
   ],
   "routes": [
     {
-      "src": "^/api/football(?:/(.*))?$",
-      "dest": "/api/football/[...path].ts"
-    },
-    {
       "handle": "filesystem"
     },
     {
