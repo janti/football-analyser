@@ -1,28 +1,16 @@
 const API_BASE_URL = 'https://v3.football.api-sports.io';
 
-type QueryValue = string | string[] | undefined;
-type RequestLike = {
-  headers: Record<string, string | string[] | undefined>;
-  query?: Record<string, QueryValue>;
-};
-type ResponseLike = {
-  status: (code: number) => ResponseLike;
-  json: (body: unknown) => void;
-  setHeader: (name: string, value: string) => void;
-  send: (body: string) => void;
-};
-
-export default async function handler(req: RequestLike, res: ResponseLike): Promise<void> {
+module.exports = async function handler(req, res) {
   try {
-    const rawPath = req.query?.['path'];
-    const path = Array.isArray(rawPath) ? rawPath[0] ?? '' : rawPath ?? '';
+    const rawPath = req.query?.path;
+    const path = Array.isArray(rawPath) ? rawPath[0] || '' : rawPath || '';
 
     if (path === '__health') {
-      const appUser = process.env['APP_GATE_USER'];
-      const appPassword = process.env['APP_GATE_PASSWORD'];
-      const apiKey = process.env['API_FOOTBALL_KEY'];
-      const incomingUser = String(req.headers['x-app-user'] ?? '');
-      const incomingPassword = String(req.headers['x-app-password'] ?? '');
+      const appUser = process.env.APP_GATE_USER;
+      const appPassword = process.env.APP_GATE_PASSWORD;
+      const apiKey = process.env.API_FOOTBALL_KEY;
+      const incomingUser = String(req.headers['x-app-user'] || '');
+      const incomingPassword = String(req.headers['x-app-password'] || '');
 
       res.status(200).json({
         ok: true,
@@ -41,9 +29,9 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
       return;
     }
 
-    const apiKey = process.env['API_FOOTBALL_KEY'];
-    const appUser = process.env['APP_GATE_USER'];
-    const appPassword = process.env['APP_GATE_PASSWORD'];
+    const apiKey = process.env.API_FOOTBALL_KEY;
+    const appUser = process.env.APP_GATE_USER;
+    const appPassword = process.env.APP_GATE_PASSWORD;
 
     if (!apiKey || !appUser || !appPassword) {
       res.status(500).json({
@@ -52,8 +40,8 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
       return;
     }
 
-    const incomingUser = String(req.headers['x-app-user'] ?? '');
-    const incomingPassword = String(req.headers['x-app-password'] ?? '');
+    const incomingUser = String(req.headers['x-app-user'] || '');
+    const incomingPassword = String(req.headers['x-app-password'] || '');
     if (incomingUser !== appUser || incomingPassword !== appPassword) {
       res.status(401).json({ message: 'Unauthorized app credentials.' });
       return;
@@ -62,7 +50,7 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
     const targetPath = path ? `/${path}` : '';
     const targetUrl = new URL(`${API_BASE_URL}${targetPath}`);
 
-    Object.entries(req.query ?? {}).forEach(([key, value]) => {
+    Object.entries(req.query || {}).forEach(([key, value]) => {
       if (key === 'path') {
         return;
       }
@@ -82,13 +70,13 @@ export default async function handler(req: RequestLike, res: ResponseLike): Prom
       }
     });
 
-    const contentType = upstream.headers.get('content-type') ?? 'application/json';
+    const contentType = upstream.headers.get('content-type') || 'application/json';
     const body = await upstream.text();
     res.setHeader('content-type', contentType);
     res.setHeader('cache-control', 'no-store, max-age=0');
     res.status(upstream.status).send(body);
-  } catch (error: unknown) {
+  } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown serverless error.';
     res.status(500).json({ message: `Function failed: ${message}` });
   }
-}
+};
