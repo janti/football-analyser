@@ -11,7 +11,12 @@ export const apiFootballAuthInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (!req.url.startsWith(env.apiFootballBaseUrl)) {
+  const isProxyMode = env.apiFootballBaseUrl === '/api/football';
+  const isProxyRequest = isProxyMode
+    ? req.url.startsWith('/api/football') || req.url.includes('/api/football/')
+    : req.url.startsWith(env.apiFootballBaseUrl);
+
+  if (!isProxyRequest && !env.apiFootballBaseUrl.includes('api-sports.io')) {
     return next(req);
   }
 
